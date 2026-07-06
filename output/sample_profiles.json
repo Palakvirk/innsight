@@ -1,0 +1,517 @@
+[
+  {
+    "hotel_id": 183,
+    "hotel_name": "Hotel Aura",
+    "area": "Paharganj, New Delhi",
+    "review_count": 11,
+    "avg_rating": 7.82,
+    "aspect_scores": {
+      "cleanliness": {
+        "avg_sentiment": 0.333,
+        "review_count": 3,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "staff": {
+        "avg_sentiment": 0.263,
+        "review_count": 4,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "food": {
+        "avg_sentiment": 0.5,
+        "review_count": 1,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "rooms": {
+        "avg_sentiment": 0.31,
+        "review_count": 5,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "amenities": {
+        "avg_sentiment": 0.5,
+        "review_count": 1,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "noise": {
+        "avg_sentiment": 0.0,
+        "review_count": 0,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "location": {
+        "avg_sentiment": 0.5,
+        "review_count": 1,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "value": {
+        "avg_sentiment": 0.0,
+        "review_count": 0,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "check_in": {
+        "avg_sentiment": 0.0,
+        "review_count": 0,
+        "trend": "flat",
+        "trend_pct": 0.0
+      }
+    },
+    "trust": {
+      "trust_score": 96.0,
+      "reliability": "High",
+      "breakdown": {
+        "consistency": 31.0,
+        "non_template": 25.0,
+        "non_burst": 20.0,
+        "freshness": 20.0
+      },
+      "suspicious_review_rate": 18.2,
+      "burst_events": [],
+      "flagged_review_ids": [
+        852,
+        846
+      ]
+    },
+    "deal_breakers": [],
+    "booking_risk": {
+      "level": "Low",
+      "reasons": [
+        "No significant negative patterns detected"
+      ]
+    },
+    "comparative_percentile": {
+      "cleanliness": 22.1,
+      "staff": 13.3,
+      "food": 60.0,
+      "rooms": 46.0,
+      "amenities": 67.2,
+      "noise": 8.3,
+      "location": 57.8,
+      "value": 0.0,
+      "check_in": 4.8
+    },
+    "should_i_book": {
+      "decision": "Book",
+      "reasons": [
+        "Strong trust score",
+        "No significant risk factors"
+      ]
+    },
+    "last_updated": "2023-08-15"
+  },
+  {
+    "hotel_id": 363,
+    "hotel_name": "J House near Bhikaji",
+    "area": "South Delhi, New Delhi",
+    "review_count": 11,
+    "avg_rating": 9.36,
+    "aspect_scores": {
+      "cleanliness": {
+        "avg_sentiment": 0.6,
+        "review_count": 4,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "staff": {
+        "avg_sentiment": 0.742,
+        "review_count": 6,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "food": {
+        "avg_sentiment": 0.5,
+        "review_count": 1,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "rooms": {
+        "avg_sentiment": 0.75,
+        "review_count": 4,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "amenities": {
+        "avg_sentiment": 0.0,
+        "review_count": 0,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "noise": {
+        "avg_sentiment": 0.7,
+        "review_count": 1,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "location": {
+        "avg_sentiment": 0.333,
+        "review_count": 3,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "value": {
+        "avg_sentiment": 0.75,
+        "review_count": 1,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "check_in": {
+        "avg_sentiment": 0.7,
+        "review_count": 1,
+        "trend": "flat",
+        "trend_pct": 0.0
+      }
+    },
+    "trust": {
+      "trust_score": 92.2,
+      "reliability": "High",
+      "breakdown": {
+        "consistency": 27.2,
+        "non_template": 25.0,
+        "non_burst": 20.0,
+        "freshness": 20.0
+      },
+      "suspicious_review_rate": 0.0,
+      "burst_events": [],
+      "flagged_review_ids": []
+    },
+    "deal_breakers": [],
+    "booking_risk": {
+      "level": "Low",
+      "reasons": [
+        "No significant negative patterns detected"
+      ]
+    },
+    "comparative_percentile": {
+      "cleanliness": 74.6,
+      "staff": 90.8,
+      "food": 63.2,
+      "rooms": 95.1,
+      "amenities": 4.3,
+      "noise": 83.3,
+      "location": 34.2,
+      "value": 85.7,
+      "check_in": 76.5
+    },
+    "should_i_book": {
+      "decision": "Book",
+      "reasons": [
+        "Strong trust score",
+        "No significant risk factors"
+      ]
+    },
+    "last_updated": "2023-08-15"
+  },
+  {
+    "hotel_id": 379,
+    "hotel_name": "Maidens Hotel New Delhi",
+    "area": "North Delhi, New Delhi",
+    "review_count": 11,
+    "avg_rating": 9.73,
+    "aspect_scores": {
+      "cleanliness": {
+        "avg_sentiment": 0.695,
+        "review_count": 2,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "staff": {
+        "avg_sentiment": 0.845,
+        "review_count": 9,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "food": {
+        "avg_sentiment": 0.51,
+        "review_count": 8,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "rooms": {
+        "avg_sentiment": 0.32,
+        "review_count": 2,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "amenities": {
+        "avg_sentiment": 0.213,
+        "review_count": 3,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "noise": {
+        "avg_sentiment": 0.85,
+        "review_count": 1,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "location": {
+        "avg_sentiment": 0.425,
+        "review_count": 2,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "value": {
+        "avg_sentiment": 0.0,
+        "review_count": 0,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "check_in": {
+        "avg_sentiment": 0.0,
+        "review_count": 1,
+        "trend": "flat",
+        "trend_pct": 0.0
+      }
+    },
+    "trust": {
+      "trust_score": 84.0,
+      "reliability": "High",
+      "breakdown": {
+        "consistency": 19.0,
+        "non_template": 25.0,
+        "non_burst": 20.0,
+        "freshness": 20.0
+      },
+      "suspicious_review_rate": 9.1,
+      "burst_events": [],
+      "flagged_review_ids": [
+        5180
+      ]
+    },
+    "deal_breakers": [],
+    "booking_risk": {
+      "level": "Low",
+      "reasons": [
+        "No significant negative patterns detected"
+      ]
+    },
+    "comparative_percentile": {
+      "cleanliness": 88.9,
+      "staff": 87.5,
+      "food": 71.4,
+      "rooms": 30.8,
+      "amenities": 54.5,
+      "noise": 75.0,
+      "location": 35.7,
+      "value": 12.5,
+      "check_in": 0.0
+    },
+    "should_i_book": {
+      "decision": "Book",
+      "reasons": [
+        "Strong trust score",
+        "No significant risk factors"
+      ]
+    },
+    "last_updated": "2023-08-15"
+  },
+  {
+    "hotel_id": 259,
+    "hotel_name": "Hotel Mannat international by Mannat",
+    "area": "Paharganj, New Delhi",
+    "review_count": 10,
+    "avg_rating": 8.5,
+    "aspect_scores": {
+      "cleanliness": {
+        "avg_sentiment": 0.5,
+        "review_count": 2,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "staff": {
+        "avg_sentiment": 0.585,
+        "review_count": 5,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "food": {
+        "avg_sentiment": 0.25,
+        "review_count": 2,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "rooms": {
+        "avg_sentiment": 0.25,
+        "review_count": 4,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "amenities": {
+        "avg_sentiment": 0.0,
+        "review_count": 1,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "noise": {
+        "avg_sentiment": 0.0,
+        "review_count": 1,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "location": {
+        "avg_sentiment": 0.0,
+        "review_count": 2,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "value": {
+        "avg_sentiment": 0.383,
+        "review_count": 3,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "check_in": {
+        "avg_sentiment": 0.0,
+        "review_count": 1,
+        "trend": "flat",
+        "trend_pct": 0.0
+      }
+    },
+    "trust": {
+      "trust_score": 84.3,
+      "reliability": "High",
+      "breakdown": {
+        "consistency": 19.3,
+        "non_template": 25.0,
+        "non_burst": 20.0,
+        "freshness": 20.0
+      },
+      "suspicious_review_rate": 0.0,
+      "burst_events": [],
+      "flagged_review_ids": []
+    },
+    "deal_breakers": [],
+    "booking_risk": {
+      "level": "Low",
+      "reasons": [
+        "No significant negative patterns detected"
+      ]
+    },
+    "comparative_percentile": {
+      "cleanliness": 33.8,
+      "staff": 63.3,
+      "food": 33.8,
+      "rooms": 29.9,
+      "amenities": 10.3,
+      "noise": 8.3,
+      "location": 4.8,
+      "value": 47.3,
+      "check_in": 4.8
+    },
+    "should_i_book": {
+      "decision": "Book",
+      "reasons": [
+        "Strong trust score",
+        "No significant risk factors"
+      ]
+    },
+    "last_updated": "2023-08-15"
+  },
+  {
+    "hotel_id": 519,
+    "hotel_name": "The Lodhi \u2013 A member of The Leading Hotels Of The World",
+    "area": "New Delhi",
+    "review_count": 10,
+    "avg_rating": 8.4,
+    "aspect_scores": {
+      "cleanliness": {
+        "avg_sentiment": 0.75,
+        "review_count": 2,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "staff": {
+        "avg_sentiment": 0.833,
+        "review_count": 3,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "food": {
+        "avg_sentiment": 0.0,
+        "review_count": 0,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "rooms": {
+        "avg_sentiment": 0.396,
+        "review_count": 6,
+        "trend": "down",
+        "trend_pct": -26.2
+      },
+      "amenities": {
+        "avg_sentiment": 0.275,
+        "review_count": 5,
+        "trend": "up",
+        "trend_pct": 15.0
+      },
+      "noise": {
+        "avg_sentiment": 0.0,
+        "review_count": 0,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "location": {
+        "avg_sentiment": 0.5,
+        "review_count": 2,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "value": {
+        "avg_sentiment": 0.0,
+        "review_count": 0,
+        "trend": "flat",
+        "trend_pct": 0.0
+      },
+      "check_in": {
+        "avg_sentiment": 0.0,
+        "review_count": 0,
+        "trend": "flat",
+        "trend_pct": 0.0
+      }
+    },
+    "trust": {
+      "trust_score": 96.7,
+      "reliability": "High",
+      "breakdown": {
+        "consistency": 31.7,
+        "non_template": 25.0,
+        "non_burst": 20.0,
+        "freshness": 20.0
+      },
+      "suspicious_review_rate": 10.0,
+      "burst_events": [],
+      "flagged_review_ids": [
+        2936
+      ]
+    },
+    "deal_breakers": [],
+    "booking_risk": {
+      "level": "Medium",
+      "reasons": [
+        "Rooms sentiment declining"
+      ]
+    },
+    "comparative_percentile": {
+      "cleanliness": 90.9,
+      "staff": 92.9,
+      "food": 10.0,
+      "rooms": 69.2,
+      "amenities": 40.0,
+      "noise": 50.0,
+      "location": 46.2,
+      "value": 28.6
+    },
+    "should_i_book": {
+      "decision": "Book with Caution",
+      "reasons": [
+        "Rooms sentiment declining"
+      ]
+    },
+    "last_updated": "2023-07-15"
+  }
+]
