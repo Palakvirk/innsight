@@ -42,6 +42,14 @@ def load_raw_reviews(csv_path: str) -> pd.DataFrame:
     # Stable hotel_id from hotel name + area (dataset has no explicit ID)
     df["hotel_id"] = (df["hotel_name"] + "|" + df["area"]).astype("category").cat.codes
 
+    #Deduplication logic
+    before = len(df)
+    df = df.drop_duplicates(subset=["hotel_id", "review_text"], keep="first").copy()
+    removed = before - len(df)
+    if removed > 0:
+        print(f"[ingest] Removed {removed} exact-duplicate reviews "
+              f"({removed/before*100:.1f}% of raw rows)")
+
     # A synthetic-but-stable review_id for downstream referencing
     df["review_id"] = df.index
 
