@@ -29,6 +29,8 @@ from engine.ingest import load_raw_reviews
 from engine.aggregate import process_all_reviews, build_hotel_profile, ASPECT_LIST
 from engine.persona import compute_persona_match, compute_all_persona_matches, PERSONA_WEIGHTS
 from engine.rag_chat import ask_hotel_question
+from engine.priority_match import rank_hotels_by_priorities
+from engine.geo import rank_hotels_by_distance
 
 app = FastAPI(title="InnSight API")
 
@@ -99,6 +101,55 @@ def list_hotels():
         for p in profiles.values()
     ]
 
+@app.get("/meta")
+def get_meta():
+    """Dataset scope info — powers the 'coverage' banner in the frontend."""
+    profiles = _state["profiles"]
+    return {
+        "city": "New Delhi",
+        "hotel_count": len(profiles),
+        "note": "InnSight currently covers hotels in New Delhi only.",
+    }
+
+
+@app.get("/search")
+def search_hotels(q: str):
+    """
+    Simple substring search over hotel names/areas. Returns matches plus
+    dataset scope info, so the frontend can distinguish "no matches for your
+    search" from "this city/hotel isn't in our dataset at all."
+    """
+    profiles = _state["profiles"]
+    q_lower = q.lower().strip()
+    matches = [
+        {
+            "hotel_id": p["hotel_id"],
+            "hotel_name": p["hotel_name"],
+            "area": p["area"],
+            "avg_rating": p["avg_rating"],
+            "trust_score": p["trust"]["trust_score"],
+        }
+        for p in profiles.values()
+        if q_lower in p["hotel_name"].lower() or q_lower in p["area"].lower()
+    ]
+    return {
+        "query": q,
+        "results": matches[:20],
+        "total_hotels_in_dataset": len(profiles),
+        "city_scope": "New Delhi",
+    }
+
+
+class PriorityMatchRequest(BaseModel):
+    text: str
+
+
+@app.post("/match")
+def match_by_priorities(req: PriorityMatchRequest):
+    """Freeform 'what do you want' search -> ranked hotel suggestions."""
+    profiles = _state["profiles"]
+    return rank_hotels_by_priorities(profiles, req.text, top_n=5)
+
 
 @app.get("/hotels/{hotel_id}")
 def get_hotel_profile(hotel_id: int):
@@ -134,6 +185,24 @@ def chat_about_hotel(hotel_id: int, req: ChatRequest):
     result = ask_hotel_question(req.question, hotel_reviews, profile["hotel_name"])
     return result
 
+class NearbyRequest(BaseModel):
+    latitude: float
+    longitude: float
+
+
+@app.post("/nearby")
+def hotels_near_me(req: NearbyRequest):
+    """
+    'Hotels near me' — ranks by distance from the user's coordinates to
+    each hotel's LOCALITY center (not exact hotel GPS, which this dataset
+    doesn't have). Honest about that limitation in the response itself.
+    """
+    profiles = _state["profiles"]
+    results = rank_hotels_by_distance(profiles, req.latitude, req.longitude, top_n=10)
+    return {
+        "results": results,
+        "note": "Distances are approximate — based on the hotel's locality, not its exact address.",
+    }
 
 if __name__ == "__main__":
     import uvicorn
