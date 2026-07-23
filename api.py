@@ -103,14 +103,15 @@ def list_hotels():
 
 @app.get("/meta")
 def get_meta():
-    """Dataset scope info — powers the 'coverage' banner in the frontend."""
+    """Dataset scope info — powers the 'coverage' banner and stat row in the frontend."""
     profiles = _state["profiles"]
+    total_reviews = sum(p["review_count"] for p in profiles.values())
     return {
         "city": "New Delhi",
         "hotel_count": len(profiles),
+        "review_count": total_reviews,
         "note": "InnSight currently covers hotels in New Delhi only.",
     }
-
 
 @app.get("/search")
 def search_hotels(q: str):
