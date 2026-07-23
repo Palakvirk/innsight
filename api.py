@@ -19,7 +19,7 @@ Then visit http://localhost:8000/docs for interactive API docs (FastAPI
 gives you this for free — worth showing judges, it doubles as live
 documentation of your own system).
 """
-
+import json
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -48,7 +48,27 @@ _state = {}
 
 @app.on_event("startup")
 def build_all_profiles():
-    print("Loading and processing all reviews...")
+    import os
+    precomputed_path = "output/all_profiles.json"
+
+    if os.path.exists(precomputed_path):
+        print(f"Loading precomputed profiles from {precomputed_path}...")
+        with open(precomputed_path) as f:
+            raw_profiles = json.load(f)
+        # JSON keys are always strings — convert hotel_id keys back to int
+        _state["profiles"] = {int(k): v for k, v in raw_profiles.items()}
+
+        # RAG chat still needs the raw processed reviews (not just the
+        # aggregated profile), so we load those separately — this part is
+        # fast (~1-2s) since it skips the expensive trust/aggregation step.
+        df = load_raw_reviews("data/hotel_reviews.csv")
+        _state["processed_df"] = process_all_reviews(df)
+        print(f"Ready — {len(_state['profiles'])} precomputed profiles loaded.")
+        return
+
+    # Fallback: no precomputed file found, build everything from scratch
+    # (this path is what used to always run — kept as a safety net)
+    print("No precomputed file found — building all profiles from scratch...")
     df = load_raw_reviews("data/hotel_reviews.csv")
     processed_df = process_all_reviews(df)
 
@@ -80,8 +100,7 @@ def build_all_profiles():
 
     _state["processed_df"] = processed_df
     _state["profiles"] = profiles
-    print(f"Ready — {len(profiles)} hotel profiles cached in memory.")
-
+    print(f"Ready — {len(profiles)} hotel profiles built from scratch.")
 
 # ---- Endpoints ----
 
