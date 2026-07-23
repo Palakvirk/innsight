@@ -71,14 +71,12 @@ def _weighted_match_score(profile: dict, weights: dict):
 
 def rank_hotels_by_priorities(profiles: dict, priority_text: str, top_n: int = 5):
     """
-    Main entry point. `profiles` is {hotel_id: profile_dict} (as cached in
-    the API's in-memory store). Returns:
+    Main entry point. Returns:
     {
         "detected_priorities": {...} or {},
-        "results": [{hotel_id, hotel_name, area, match_pct, matched_on: [...]}]
+        "is_fallback": bool,   # True if we couldn't detect specific priorities
+        "results": [...]
     }
-    If no recognizable priorities were detected in the text, falls back to
-    ranking by overall trust_score + avg_rating instead of guessing intent.
     """
     weights = extract_priorities_from_text(priority_text)
 
@@ -93,7 +91,7 @@ def rank_hotels_by_priorities(profiles: dict, priority_text: str, top_n: int = 5
                 "matched_on": [],
             })
         results.sort(key=lambda r: r["match_pct"], reverse=True)
-        return {"detected_priorities": {}, "results": results[:top_n]}
+        return {"detected_priorities": {}, "is_fallback": True, "results": results[:top_n]}
 
     for profile in profiles.values():
         match_pct, matched_aspects = _weighted_match_score(profile, weights)
@@ -108,4 +106,4 @@ def rank_hotels_by_priorities(profiles: dict, priority_text: str, top_n: int = 5
         })
 
     results.sort(key=lambda r: r["match_pct"], reverse=True)
-    return {"detected_priorities": weights, "results": results[:top_n]}
+    return {"detected_priorities": weights, "is_fallback": False, "results": results[:top_n]}

@@ -718,3 +718,7 @@ header {
 .stat-strip {
   justify-content: center;
 }
+
+.fallback-note {
+  color: var(--risk-red);
+}

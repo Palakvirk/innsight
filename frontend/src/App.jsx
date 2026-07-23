@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
 import './App.css'
 
-const API_BASE = 'http://localhost:8000'
+
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000'
 
 function TrustSeal({ score, reliability }) {
   return (
@@ -375,7 +376,11 @@ function App() {
               )}
               {priorityResults && !priorityLoading && (
                 <>
-                  {Object.keys(priorityResults.detected_priorities).length > 0 && (
+                  {priorityResults.is_fallback ? (
+                    <p className="detected-note fallback-note">
+                      Couldn't detect specific preferences from that — showing top overall-trusted hotels instead.
+                    </p>
+                  ) : (
                     <p className="detected-note">
                       Prioritizing: {Object.keys(priorityResults.detected_priorities).map(a => a.replace('_', ' ')).join(', ')}
                     </p>
@@ -383,7 +388,7 @@ function App() {
                   <ResultsList
                     results={priorityResults.results}
                     onSelect={setSelectedId}
-                    showMatch={true}
+                    showMatch={!priorityResults.is_fallback}
                     emptyMessage="Couldn't find a strong match — try different words."
                   />
                 </>

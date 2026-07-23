@@ -36,6 +36,9 @@ ASPECT_KEYWORDS = {
         "amenities", "gym", "pool", "spa", "elevator", "lift", "parking",
         "ac", "air condition", "tv", "television", "facilities", "wifi",
         "wi-fi", "internet", "hot water", "geyser",
+        "pet", "pets", "pet friendly", "pet-friendly", "petfriendly",
+        "workout", "dumbbells", "dumbbell", "exercise", "fitness",
+        "treadmill", "fitness center", "fitness centre", "weights",
     ],
     "noise": [
         "noise", "noisy", "loud", "quiet", "peaceful", "silent", "traffic sound",
