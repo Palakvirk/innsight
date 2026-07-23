@@ -168,8 +168,8 @@ class PriorityMatchRequest(BaseModel):
 def match_by_priorities(req: PriorityMatchRequest):
     """Freeform 'what do you want' search -> ranked hotel suggestions."""
     profiles = _state["profiles"]
-    return rank_hotels_by_priorities(profiles, req.text, top_n=5)
-
+    processed_df = _state["processed_df"]
+    return rank_hotels_by_priorities(profiles, req.text, processed_df=processed_df, top_n=5)
 
 @app.get("/hotels/{hotel_id}")
 def get_hotel_profile(hotel_id: int):

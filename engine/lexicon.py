@@ -21,7 +21,7 @@ ASPECT_KEYWORDS = {
     ],
     "staff": [
         "staff", "service", "receptionist", "reception", "manager",
-        "helpful", "rude", "friendly", "courteous", "hospitality",
+        "helpful", "rude", "courteous", "hospitality",
         "front desk", "employee", "behaviour", "behavior", "attitude",
     ],
     "food": [

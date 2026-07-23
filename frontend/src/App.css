@@ -722,3 +722,14 @@ header {
 .fallback-note {
   color: var(--risk-red);
 }
+
+.evidence-confirmed {
+  font-size: 0.68rem;
+  color: var(--good-green);
+  font-weight: 600;
+}
+
+.evidence-missing {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
