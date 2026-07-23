@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
 import './App.css'
 
@@ -92,6 +92,101 @@ function AIWorkingSteps({ steps }) {
           </div>
         ))}
       </div>
+    </div>
+  )
+}
+
+function ChatPanel({ hotelId }) {
+  const [messages, setMessages] = useState([])
+  const [question, setQuestion] = useState('')
+  const [asking, setAsking] = useState(false)
+  const threadRef = useRef(null)
+
+  useEffect(() => {
+    setMessages([])
+    setQuestion('')
+  }, [hotelId])
+
+  useEffect(() => {
+    if (threadRef.current) {
+      threadRef.current.scrollTop = threadRef.current.scrollHeight
+    }
+  }, [messages, asking])
+
+  function handleAsk(e) {
+    e.preventDefault()
+    if (!question.trim() || asking) return
+    const q = question.trim()
+    setQuestion('')
+    setAsking(true)
+    axios.post(`${API_BASE}/hotels/${hotelId}/chat`, { question: q }).then(res => {
+      setMessages(prev => [...prev, { question: q, ...res.data }])
+      setAsking(false)
+    }).catch(() => {
+      setMessages(prev => [...prev, {
+        question: q,
+        answer: "Something went wrong answering that — try again.",
+        confidence: 0,
+        based_on_count: 0,
+      }])
+      setAsking(false)
+    })
+  }
+
+  function confidenceClass(confidence) {
+    if (confidence >= 0.7) return 'confidence-high'
+    if (confidence >= 0.4) return 'confidence-medium'
+    return 'confidence-low'
+  }
+
+  return (
+    <div className="chat-panel">
+      <h4 className="chat-title">Ask about this hotel</h4>
+
+      {messages.length === 0 && (
+        <p className="empty-message">
+          Try: "Is the WiFi good?", "Is it safe for solo women?", "Is breakfast worth it?"
+        </p>
+      )}
+
+      <div className="chat-thread" ref={threadRef}>
+        {messages.map((m, i) => (
+          <div className="chat-message" key={i}>
+            <div className="chat-question">{m.question}</div>
+            <div className="chat-answer">
+              {m.answer}
+              <div className="chat-meta">
+                <span className={`confidence-badge ${confidenceClass(m.confidence)}`}>
+                  {Math.round(m.confidence * 100)}% confidence
+                </span>
+                <span className="chat-based-on">
+                  {m.based_on_count > 0 ? `Based on ${m.based_on_count} reviews` : 'No supporting reviews found'}
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
+        {asking && (
+          <div className="chat-message">
+            <div className="chat-thinking">
+              <span className="ai-step-check">•</span> Reading reviews and composing an answer...
+            </div>
+          </div>
+        )}
+      </div>
+
+      <form onSubmit={handleAsk} className="chat-input-row">
+        <input
+          className="text-input chat-input"
+          placeholder="Ask a question about this hotel..."
+          value={question}
+          onChange={e => setQuestion(e.target.value)}
+          disabled={asking}
+        />
+        <button type="submit" className="primary-button chat-send" disabled={asking || !question.trim()}>
+          Ask
+        </button>
+      </form>
     </div>
   )
 }
@@ -324,7 +419,12 @@ function App() {
 
         <div className="result-col">
           {loading && <p className="empty-message">Loading hotel profile...</p>}
-          {profile && !loading && <TrustCard profile={profile} key={profile.hotel_id} />}
+          {profile && !loading && (
+            <div className="profile-grid">
+              <TrustCard profile={profile} key={profile.hotel_id} />
+              <ChatPanel hotelId={profile.hotel_id} key={`chat-${profile.hotel_id}`} />
+            </div>
+          )}
           {!profile && !loading && (
             <p className="empty-message placeholder-message">
               Select a hotel to see its Trust Score, reliability breakdown, and analysis.

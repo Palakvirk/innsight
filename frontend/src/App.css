@@ -33,7 +33,7 @@ body {
 }
 
 .app {
-  max-width: 760px;
+  max-width: 1160px;
   margin: 0 auto;
   padding: 24px 20px 80px;
 }
@@ -192,6 +192,22 @@ header h1 {
   flex-direction: column;
   gap: 6px;
   margin-top: 12px;
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.results-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.results-list::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 999px;
+}
+
+.results-list::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .result-row {
@@ -467,12 +483,24 @@ header h1 {
 }
 
 .workspace.has-result .panel-col {
-  flex: 1;
+  flex: 0 0 300px;
 }
 
 .workspace.has-result .result-col {
   flex: 1;
-  display: block;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Smooth slide-in when a hotel's trust breakdown appears */
@@ -564,4 +592,129 @@ header h1 {
 @keyframes stepFadeIn {
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+
+.chat-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  margin-top: 0;
+}
+
+.chat-title {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 12px 0;
+}
+
+.chat-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 16px;
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.chat-message {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.chat-question {
+  align-self: flex-end;
+  background: var(--dusty-blue-soft);
+  color: var(--dusty-blue-deep);
+  padding: 8px 14px;
+  border-radius: 12px 12px 2px 12px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  max-width: 85%;
+}
+
+.chat-answer {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 12px 14px;
+  border-radius: 2px 12px 12px 12px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  max-width: 90%;
+}
+
+.chat-thinking {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+.chat-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.confidence-badge {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.confidence-high {
+  background: var(--good-green-bg);
+  color: var(--good-green);
+}
+
+.confidence-medium {
+  background: #fdf4e3;
+  color: var(--brass-soft);
+}
+
+.confidence-low {
+  background: var(--risk-red-bg);
+  color: var(--risk-red);
+}
+
+.chat-based-on {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.chat-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.chat-input {
+  flex: 1;
+  padding: 12px 14px;
+}
+
+.chat-send {
+  align-self: stretch;
+  padding: 0 20px;
+}
+
+header {
+  max-width: 640px;
+  margin: 0 auto 8px auto;
+  text-align: center;
+}
+
+.hero-sentence {
+  margin: 14px auto 28px auto;
+}
+
+.stat-strip {
+  justify-content: center;
 }
