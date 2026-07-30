@@ -135,7 +135,17 @@ Respond with ONLY a JSON array, no other text, in this exact format:
 "strength" = how strongly/clearly it confirms it (0 = barely relevant, 100 = explicit and clear)."""
 
         model = genai.GenerativeModel("gemini-2.5-flash")
-        response = model.generate_content(prompt)
+
+        # The google-generativeai SDK's own timeout handling is unreliable
+        # (well-documented open issues where it's simply not respected), so
+        # we enforce a hard cutoff ourselves via a thread — if Gemini takes
+        # too long, we give up and fall back to trust-score ordering rather
+        # than let the request hang.
+        import concurrent.futures
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+            future = executor.submit(model.generate_content, prompt)
+            response = future.result(timeout=12)
+
         text = response.text.strip()
         # strip markdown code fences if the model added them despite instructions
         text = re.sub(r'^```(json)?|```$', '', text.strip(), flags=re.MULTILINE).strip()
@@ -246,15 +256,26 @@ def rank_hotels_by_priorities(profiles: dict, priority_text: str, processed_df=N
         })
 
     if hotel_text_cache:
-        # Ask an LLM to verify the small shortlist of keyword-confirmed
-        # candidates — see module docstring for why rule-based sentiment
-        # can't reliably do this. Fails safe: if the LLM call doesn't
-        # return anything usable, we fall back to trust-score ordering.
+        # Ask an LLM to verify only a BOUNDED shortlist of the strongest
+        # keyword-confirmed candidates — see module docstring for why
+        # rule-based sentiment can't reliably do this verification itself.
+        # IMPORTANT: for common keywords (e.g. "metro", "clean"), dozens or
+        # even hundreds of hotels can match — sending all of them into one
+        # LLM prompt would be slow and unbounded. We cap it to a small,
+        # fixed number (ranked by trust score first) so latency stays
+        # predictable no matter how common the query terms are. Anything
+        # outside this cap still gets the keyword-match label, just without
+        # LLM verification — it falls back to trust-score ordering below.
+        MAX_LLM_CANDIDATES = 12
+
         evidence_confirmed = [r for r in results if r["has_direct_evidence"]]
+        evidence_confirmed.sort(key=lambda r: -r["trust_score"])
+        shortlist = evidence_confirmed[:MAX_LLM_CANDIDATES]
+
         llm_verdicts = {}
-        if evidence_confirmed:
+        if shortlist:
             candidates_for_llm = []
-            for r in evidence_confirmed:
+            for r in shortlist:
                 hotel_text = hotel_text_cache.get(r["hotel_id"], "")
                 evidence_text = _get_evidence_sentences(hotel_text, keyword_patterns)
                 candidates_for_llm.append({
@@ -276,7 +297,7 @@ def rank_hotels_by_priorities(profiles: dict, priority_text: str, processed_df=N
             if r["llm_strength"] is not None:
                 # LLM-verified: sort confirmed-true first, by strength
                 return (0 if r["has_direct_evidence"] else 1, -r["llm_strength"])
-            # No LLM verdict available (call failed, or wasn't a candidate):
+            # No LLM verdict available (outside the cap, or call failed):
             # confirmed-by-keyword-only candidates next, then trust score
             return (2 if not r["has_direct_evidence"] else 1, -r["trust_score"])
 
