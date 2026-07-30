@@ -306,8 +306,11 @@ function App() {
         <h1>InnSight</h1>
         <p className="tagline">See what other guests won't tell you</p>
         <p className="hero-sentence">
-          AI analyzes real guest reviews to reveal which hotels are genuinely worth your money.
-          (currently covering hotels only in Paharganj)
+          AI analyzes real guest reviews to reveal which hotels are truly worth your money.
+          <br />
+          <span style={{ fontStyle: "italic", opacity: 0.8 }}>
+          (Currently covering hotels in Paharganj only.)
+          </span>
         </p>
         {meta && (
           <div className="stat-strip">
