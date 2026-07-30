@@ -41,7 +41,7 @@ if _API_KEY:
 else:
     logger.warning("GEMINI_API_KEY not set — chat will return a fallback answer instead of calling Gemini.")
 
-MODEL_NAME = "gemini-2.5-flash"
+MODEL_NAME = "gemini-2.5-flash-lite"
 GEMINI_TIMEOUT_SECONDS = 20
 
 FALLBACK_ANSWER = (
