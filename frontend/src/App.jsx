@@ -368,7 +368,7 @@ function App() {
               <form onSubmit={handlePrioritySubmit} className="priority-form">
                 <textarea
                   className="text-input"
-                  placeholder="e.g. I want a quiet hotel near the metro with good breakfast"
+                  placeholder="e.g. I want a quiet hotel with pool and good breakfast"
                   value={priorityText}
                   onChange={e => setPriorityText(e.target.value)}
                   rows={2}
@@ -384,7 +384,7 @@ function App() {
                 <>
                   {priorityResults.is_fallback ? (
                     <p className="detected-note fallback-note">
-                      Couldn't detect specific preferences from that — showing top overall-trusted hotels instead.
+                      OOOPPSIEEE!!! Couldn't detect specific preferences from that, showing top overall-trusted hotels instead.
                     </p>
                   ) : (
                     <p className="detected-note">
