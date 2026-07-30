@@ -76,6 +76,26 @@ def _extract_literal_keywords(text: str) -> list:
     return found
 
 
+# Generic aspect-category words are too broad to count as "evidence" of
+# anything specific. Almost every hotel has SOME review mentioning "food"
+# or "staff" in some generic sense — so their mere presence doesn't confirm
+# a specific request. E.g. "South Indian food" should NOT be marked
+# "confirmed in reviews" just because a review says "food was good" — that
+# says nothing about South Indian food specifically. Only the more precise
+# terms below are treated as real, checkable evidence.
+_TOO_GENERIC_FOR_EVIDENCE = {
+    "food", "rooms", "room", "staff", "service", "location", "value",
+    "noise", "cleanliness", "amenities", "facilities",
+    "check-in", "check in", "checkin", "check-out", "check out", "checkout",
+}
+
+
+def _filter_specific_keywords(literal_keywords: list) -> list:
+    """Drops overly-generic keywords before evidence-checking — see
+    _TOO_GENERIC_FOR_EVIDENCE above for why."""
+    return [kw for kw in literal_keywords if kw not in _TOO_GENERIC_FOR_EVIDENCE]
+
+
 def _get_evidence_sentences(hotel_reviews_text: str, patterns: list, max_sentences: int = 3) -> str:
     """Extract just the sentence(s) containing a keyword match, so the LLM
     verification prompt stays short and focused rather than sending whole
@@ -197,7 +217,7 @@ def rank_hotels_by_priorities(profiles: dict, priority_text: str, processed_df=N
     }
     """
     weights = extract_priorities_from_text(priority_text)
-    literal_keywords = _extract_literal_keywords(priority_text)
+    literal_keywords = _filter_specific_keywords(_extract_literal_keywords(priority_text))
 
     if not weights:
         results = []
