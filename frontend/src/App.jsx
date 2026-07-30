@@ -68,7 +68,7 @@ function ResultsList({ results, onSelect, emptyMessage, showMatch, showDistance 
             <span className="result-name">{r.hotel_name}</span>
             <span className="result-area">{r.area}</span>
           </div>
-          <<div className="result-side">
+          <div className="result-side">
             {showMatch && <span className="result-match">{r.match_pct}% match</span>}
             {showDistance && <span className="result-match">{r.approx_distance_km} km</span>}
             {r.has_direct_evidence === true && (
