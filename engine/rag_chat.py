@@ -15,6 +15,9 @@ Confidence Score formula:
 """
 
 import os
+import time
+import random
+import hashlib
 import logging
 import concurrent.futures
 import numpy as np
@@ -45,6 +48,35 @@ FALLBACK_ANSWER = (
     "I'm having trouble reaching the AI service right now, so I can't generate "
     "an answer for this question at the moment. Please try again in a moment."
 )
+
+# ---- Simple in-memory response cache ----
+# The free Gemini tier has a tight requests-per-minute/day quota, and demo
+# sessions tend to repeat similar questions across hotels/testers. Caching
+# identical (hotel, question) pairs cuts real API calls dramatically without
+# touching any of the actual retrieval/generation logic. In-memory is fine
+# for a single-process hackathon deploy; it just resets on restart.
+_response_cache = {}
+CACHE_TTL_SECONDS = 60 * 60  # 1 hour
+
+
+def _cache_key(hotel_name: str, question: str) -> str:
+    normalized = f"{hotel_name.strip().lower()}::{question.strip().lower()}"
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+
+
+def _cache_get(key: str):
+    entry = _response_cache.get(key)
+    if entry is None:
+        return None
+    result, saved_at = entry
+    if time.time() - saved_at > CACHE_TTL_SECONDS:
+        _response_cache.pop(key, None)
+        return None
+    return result
+
+
+def _cache_set(key: str, result: dict):
+    _response_cache[key] = (result, time.time())
 
 
 def _compute_confidence(retrieved: list) -> float:
@@ -115,18 +147,33 @@ def _extract_answer_text(response) -> str:
     return response.text.strip()
 
 
-def _call_gemini(prompt: str) -> str:
+def _call_gemini(prompt: str, max_retries: int = 2) -> str:
     """
     Calls Gemini with a hard timeout (the SDK's own timeout handling is
-    unreliable — same issue noted in priority_match.py) and raises on any
-    failure so the caller can decide how to fail gracefully, instead of a
-    500 bubbling all the way up to the frontend.
+    unreliable — same issue noted in priority_match.py). Retries on 429
+    ResourceExhausted specifically, with a short backoff plus jitter — a
+    single retry often succeeds since free-tier RPM limits are a rolling
+    window, not a hard daily block. Any other exception (or repeated 429s)
+    is raised so the caller can fail soft.
     """
+    from google.api_core.exceptions import ResourceExhausted
+
     model = genai.GenerativeModel(MODEL_NAME)
-    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-        future = executor.submit(model.generate_content, prompt)
-        response = future.result(timeout=GEMINI_TIMEOUT_SECONDS)
-    return _extract_answer_text(response)
+    attempt = 0
+    while True:
+        try:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(model.generate_content, prompt)
+                response = future.result(timeout=GEMINI_TIMEOUT_SECONDS)
+            return _extract_answer_text(response)
+        except ResourceExhausted:
+            attempt += 1
+            if attempt > max_retries:
+                raise
+            backoff = (2 ** attempt) + random.uniform(0, 1)
+            logger.warning("Gemini rate-limited (429) — retry %s/%s in %.1fs",
+                            attempt, max_retries, backoff)
+            time.sleep(backoff)
 
 
 def ask_hotel_question(question: str, hotel_reviews, hotel_name: str, top_k: int = 8):
@@ -162,6 +209,11 @@ def ask_hotel_question(question: str, hotel_reviews, hotel_name: str, top_k: int
             "based_on_count": len(retrieved),
         }
 
+    cache_key = _cache_key(hotel_name, question)
+    cached = _cache_get(cache_key)
+    if cached is not None:
+        return cached
+
     prompt = _build_prompt(question, retrieved, hotel_name)
 
     try:
@@ -172,21 +224,30 @@ def ask_hotel_question(question: str, hotel_reviews, hotel_name: str, top_k: int
         answer_text = FALLBACK_ANSWER
         confidence = 0.0
     except Exception as e:
-        # Covers rate limits, invalid/expired API key, network errors,
-        # safety blocks, and anything else the SDK can throw. Logged with
-        # the real exception so it's diagnosable server-side, but the
-        # person using the app just sees an honest, non-crashing answer.
+        # Covers rate limits (after retries exhausted), invalid/expired API
+        # key, network errors, safety blocks, and anything else the SDK can
+        # throw. Logged with the real exception so it's diagnosable
+        # server-side, but the person using the app just sees an honest,
+        # non-crashing answer.
         logger.exception("Gemini call failed for question=%r hotel=%r: %s",
                           question, hotel_name, e)
         answer_text = FALLBACK_ANSWER
         confidence = 0.0
 
-    return {
+    result = {
         "answer": answer_text,
         "confidence": confidence,
         "supporting_review_ids": [r["review_id"] for r in retrieved],
         "based_on_count": len(retrieved),
     }
+
+    # Only cache genuine successful answers — never cache the fallback, or
+    # a transient rate-limit/outage would get "stuck" as the cached answer
+    # for the rest of the TTL window.
+    if answer_text != FALLBACK_ANSWER:
+        _cache_set(cache_key, result)
+
+    return result
 
 
 if __name__ == "__main__":
