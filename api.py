@@ -20,6 +20,7 @@ gives you this for free — worth showing judges, it doubles as live
 documentation of your own system).
 """
 import json
+import logging
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -31,6 +32,9 @@ from engine.persona import compute_persona_match, compute_all_persona_matches, P
 from engine.rag_chat import ask_hotel_question
 from engine.priority_match import rank_hotels_by_priorities
 from engine.geo import rank_hotels_by_distance
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("innsight.api")
 
 app = FastAPI(title="InnSight API")
 
@@ -202,7 +206,23 @@ def chat_about_hotel(hotel_id: int, req: ChatRequest):
 
     processed_df = _state["processed_df"]
     hotel_reviews = processed_df[processed_df["hotel_id"] == hotel_id]
-    result = ask_hotel_question(req.question, hotel_reviews, profile["hotel_name"])
+
+    # ask_hotel_question() already fails soft internally (missing key, rate
+    # limits, timeouts, safety blocks all return a normal answer dict), but
+    # this try/except is a last line of defense so a truly unexpected error
+    # still returns a clean 200 with an honest message instead of a raw 500
+    # that the frontend can only show as "something went wrong — try again".
+    try:
+        result = ask_hotel_question(req.question, hotel_reviews, profile["hotel_name"])
+    except Exception:
+        logger.exception("Unexpected error in chat endpoint for hotel_id=%s question=%r",
+                          hotel_id, req.question)
+        result = {
+            "answer": "Something went wrong generating an answer for this question. Please try again.",
+            "confidence": 0.0,
+            "supporting_review_ids": [],
+            "based_on_count": 0,
+        }
     return result
 
 class NearbyRequest(BaseModel):

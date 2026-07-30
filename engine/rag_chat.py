@@ -15,15 +15,36 @@ Confidence Score formula:
 """
 
 import os
+import logging
+import concurrent.futures
 import numpy as np
 import google.generativeai as genai
 from dotenv import load_dotenv
 from .retrieval import retrieve_relevant_reviews
 
 load_dotenv()
-genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+
+logger = logging.getLogger("innsight.rag_chat")
+
+# IMPORTANT: don't crash the whole API process just because the key is
+# missing/misconfigured. Previously `genai.configure` ran at import time
+# with a bare `os.environ[...]` lookup, so a missing/blank GEMINI_API_KEY
+# would raise a KeyError the moment api.py imported this module — taking
+# down every endpoint, not just chat. Configure defensively instead, and
+# let ask_hotel_question() fail soft per-request.
+_API_KEY = os.environ.get("GEMINI_API_KEY")
+if _API_KEY:
+    genai.configure(api_key=_API_KEY)
+else:
+    logger.warning("GEMINI_API_KEY not set — chat will return a fallback answer instead of calling Gemini.")
 
 MODEL_NAME = "gemini-2.5-flash"
+GEMINI_TIMEOUT_SECONDS = 20
+
+FALLBACK_ANSWER = (
+    "I'm having trouble reaching the AI service right now, so I can't generate "
+    "an answer for this question at the moment. Please try again in a moment."
+)
 
 
 def _compute_confidence(retrieved: list) -> float:
@@ -70,6 +91,44 @@ Instructions:
 """
 
 
+def _extract_answer_text(response) -> str:
+    """
+    Safely pulls text out of a Gemini response. `response.text` raises
+    ValueError if Gemini's safety filters blocked every candidate (no parts
+    to read) — this happens silently and looks identical to a normal call
+    from the outside, so it's a common source of unhandled crashes. We check
+    explicitly instead of letting that attribute access throw.
+    """
+    if not getattr(response, "candidates", None):
+        block_reason = None
+        feedback = getattr(response, "prompt_feedback", None)
+        if feedback is not None:
+            block_reason = getattr(feedback, "block_reason", None)
+        raise ValueError(f"Gemini returned no candidates (block_reason={block_reason})")
+
+    candidate = response.candidates[0]
+    finish_reason = getattr(candidate, "finish_reason", None)
+    # finish_reason 3 == SAFETY in the genai SDK's enum
+    if finish_reason == 3:
+        raise ValueError("Gemini blocked the response for safety reasons")
+
+    return response.text.strip()
+
+
+def _call_gemini(prompt: str) -> str:
+    """
+    Calls Gemini with a hard timeout (the SDK's own timeout handling is
+    unreliable — same issue noted in priority_match.py) and raises on any
+    failure so the caller can decide how to fail gracefully, instead of a
+    500 bubbling all the way up to the frontend.
+    """
+    model = genai.GenerativeModel(MODEL_NAME)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+        future = executor.submit(model.generate_content, prompt)
+        response = future.result(timeout=GEMINI_TIMEOUT_SECONDS)
+    return _extract_answer_text(response)
+
+
 def ask_hotel_question(question: str, hotel_reviews, hotel_name: str, top_k: int = 8):
     """
     Main entry point. Returns:
@@ -79,6 +138,10 @@ def ask_hotel_question(question: str, hotel_reviews, hotel_name: str, top_k: int
         "supporting_review_ids": [...],
         "based_on_count": int,
     }
+    Fails soft: if retrieval finds nothing, or the Gemini call fails for any
+    reason (missing key, rate limit, timeout, safety block, network error),
+    this returns a normal 200-shaped dict with an honest fallback answer
+    instead of raising — callers should never need a try/except around this.
     """
     retrieved = retrieve_relevant_reviews(question, hotel_reviews, top_k=top_k)
     confidence = _compute_confidence(retrieved)
@@ -91,12 +154,35 @@ def ask_hotel_question(question: str, hotel_reviews, hotel_name: str, top_k: int
             "based_on_count": 0,
         }
 
+    if not _API_KEY:
+        return {
+            "answer": FALLBACK_ANSWER,
+            "confidence": 0.0,
+            "supporting_review_ids": [r["review_id"] for r in retrieved],
+            "based_on_count": len(retrieved),
+        }
+
     prompt = _build_prompt(question, retrieved, hotel_name)
-    model = genai.GenerativeModel(MODEL_NAME)
-    response = model.generate_content(prompt)
+
+    try:
+        answer_text = _call_gemini(prompt)
+    except concurrent.futures.TimeoutError:
+        logger.warning("Gemini call timed out after %ss for question=%r hotel=%r",
+                        GEMINI_TIMEOUT_SECONDS, question, hotel_name)
+        answer_text = FALLBACK_ANSWER
+        confidence = 0.0
+    except Exception as e:
+        # Covers rate limits, invalid/expired API key, network errors,
+        # safety blocks, and anything else the SDK can throw. Logged with
+        # the real exception so it's diagnosable server-side, but the
+        # person using the app just sees an honest, non-crashing answer.
+        logger.exception("Gemini call failed for question=%r hotel=%r: %s",
+                          question, hotel_name, e)
+        answer_text = FALLBACK_ANSWER
+        confidence = 0.0
 
     return {
-        "answer": response.text.strip(),
+        "answer": answer_text,
         "confidence": confidence,
         "supporting_review_ids": [r["review_id"] for r in retrieved],
         "based_on_count": len(retrieved),
