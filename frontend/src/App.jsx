@@ -309,7 +309,7 @@ function App() {
           AI analyzes real guest reviews to reveal which hotels are truly worth your money.
           <br />
           <span style={{ fontStyle: "italic", opacity: 0.8 }}>
-          (Currently covering hotels in Paharganj only.)
+          (Currently covering hotels in new Delhi only.)
           </span>
         </p>
         {meta && (
